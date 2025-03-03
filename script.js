@@ -37,11 +37,9 @@ const carConnectionStatus = document.getElementById('car-connection-status');
 const carConnectionLatency = document.getElementById('car-connection-latency');
 
 const frontCamera = document.getElementById('front-camera');
-const sideCamera = document.getElementById('side-camera');
 const backCamera = document.getElementById('back-camera');
 
 const frontCameraSelect = document.getElementById('front-camera-select');
-const sideCameraSelect = document.getElementById('side-camera-select');
 const backCameraSelect = document.getElementById('back-camera-select');
 const applyCameraSettingsButton = document.getElementById(
   'apply-camera-settings'
@@ -263,13 +261,6 @@ function initializePeer(specificId = null) {
             });
             console.log('Front camera stream obtained');
             break;
-          case 'side':
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: { deviceId: { exact: sideCameraSelect.value } },
-              audio: false,
-            });
-            console.log('Side camera stream obtained');
-            break;
           case 'back':
             stream = await navigator.mediaDevices.getUserMedia({
               video: { deviceId: { exact: backCameraSelect.value } },
@@ -340,7 +331,6 @@ async function getAvailableCameras() {
 function populateCameraSelects() {
   // Clear existing options
   frontCameraSelect.innerHTML = '<option value="">None</option>';
-  sideCameraSelect.innerHTML = '<option value="">None</option>';
   backCameraSelect.innerHTML = '<option value="">None</option>';
 
   // Add camera options to each select
@@ -349,11 +339,6 @@ function populateCameraSelects() {
     frontOption.value = device.deviceId;
     frontOption.text = device.label || `Camera ${index + 1}`;
     frontCameraSelect.appendChild(frontOption);
-
-    const sideOption = document.createElement('option');
-    sideOption.value = device.deviceId;
-    sideOption.text = device.label || `Camera ${index + 1}`;
-    sideCameraSelect.appendChild(sideOption);
 
     const backOption = document.createElement('option');
     backOption.value = device.deviceId;
@@ -364,8 +349,7 @@ function populateCameraSelects() {
   // If we have multiple cameras, set different defaults for each view
   if (videoDevices.length > 1) {
     frontCameraSelect.selectedIndex = 0;
-    sideCameraSelect.selectedIndex = Math.min(1, videoDevices.length - 1);
-    backCameraSelect.selectedIndex = Math.min(2, videoDevices.length - 1);
+    backCameraSelect.selectedIndex = 0;
   }
 }
 
