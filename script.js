@@ -4,6 +4,7 @@
 var peer;
 var conn;
 var isCarMode = true;
+var isCarModeId = 0;
 var isConnected = false;
 var carId = '';
 
@@ -25,8 +26,10 @@ let previousFrameData = {};
 
 // DOM Elements - Mode Selection
 const carModeBtn = document.getElementById('car-mode-btn');
+const carModeBtn2 = document.getElementById('car2-mode-btn');
 const clientModeBtn = document.getElementById('client-mode-btn');
 const carInterface = document.getElementById('car-interface');
+const carInterface2 = document.getElementById('car-interface2');
 const clientInterface = document.getElementById('client-interface');
 
 // DOM Elements - Car Mode
@@ -51,7 +54,9 @@ const backMotionOverlay = document.getElementById('back-motion-overlay');
 
 // DOM Elements - Client Mode
 const carIdInput = document.getElementById('car-id-input');
+const carIdInput2 = document.getElementById('car-id-input2');
 const connectButton = document.getElementById('connect-btn');
+const carbutton = document.getElementById('car-connect-btn');
 const clientConnectionStatus = document.getElementById(
   'client-connection-status'
 );
@@ -80,7 +85,8 @@ const clientMotionOverlay = document.getElementById('client-motion-overlay');
 // Initialize the application
 function initialize() {
   // Set up mode selection
-  carModeBtn.addEventListener('click', () => switchMode(true));
+  carModeBtn.addEventListener('click', () => switchMode(true,0));
+  carModeBtn2.addEventListener('click', () => switchMode(true,1));
   clientModeBtn.addEventListener('click', () => switchMode(false));
 
   // Initialize based on default mode (car mode)
@@ -90,20 +96,33 @@ function initialize() {
 }
 
 // Switch between car and client modes
-function switchMode(toCarMode) {
+function switchMode(toCarMode,id=2) {
   isCarMode = toCarMode;
-
+  isCarModeId = id
   // Update UI
-  if (isCarMode) {
+  if (isCarMode && id == 0) {
     carModeBtn.classList.add('active');
+    carModeBtn2.classList.remove('active');
     clientModeBtn.classList.remove('active');
     carInterface.classList.remove('hidden');
+    carInterface2.classList.add('hidden');
+    clientInterface.classList.add('hidden');
+
+    // Initialize car mode if not already initialized
+    initializeCarMode();
+  } else if (isCarMode && id == 1) {
+    carModeBtn2.classList.add('active');
+    carModeBtn.classList.remove('active');
+    clientModeBtn.classList.remove('active');
+    carInterface2.classList.remove('hidden');
+    carInterface.classList.add('hidden');
     clientInterface.classList.add('hidden');
 
     // Initialize car mode if not already initialized
     initializeCarMode();
   } else {
     carModeBtn.classList.remove('active');
+    carModeBtn2.classList.remove('active');
     clientModeBtn.classList.add('active');
     carInterface.classList.add('hidden');
     clientInterface.classList.remove('hidden');
@@ -141,36 +160,44 @@ function initializeCarMode() {
   if (!carId) {
     carId = generateCarId();
   }
+  carbutton.addEventListener('click', () => {
+    const id = carIdInput2.value.trim();
+    if (id) {
+      connectToCarAsCam(id);
 
-  // Initialize PeerJS with the car ID
-  initializePeer('carcal-' + carId);
+    // Initialize PeerJS with the car ID
+    initializePeer('carcal2-' + carIdInput2);
 
-  // Display the car ID (without prefix)
-  carIdElement.textContent = carId;
-
-  // Set up event listeners for car mode
-  copyCarIdButton.addEventListener('click', () => {
-    navigator.clipboard
-      .writeText(carId)
-      .then(() => {
-        alert('Car ID copied to clipboard');
-      })
-      .catch((err) => {
-        console.error('Failed to copy:', err);
-      });
-  });
-
-  generateNewIdButton.addEventListener('click', () => {
-    // Generate a new ID
-    carId = generateCarId();
+    // Display the car ID (without prefix)
     carIdElement.textContent = carId;
 
-    // Reinitialize peer with new ID
-    initializePeer('carcal-' + carId);
-  });
+    // Set up event listeners for car mode
+    copyCarIdButton.addEventListener('click', () => {
+      navigator.clipboard
+        .writeText(carId)
+        .then(() => {
+          alert('Car ID copied to clipboard');
+        })
+        .catch((err) => {
+          console.error('Failed to copy:', err);
+        });
+    });
 
-  applyCameraSettingsButton.addEventListener('click', () => {
+    generateNewIdButton.addEventListener('click', () => {
+      // Generate a new ID
+      carId = generateCarId();
+      carIdElement.textContent = carId;
+
+      // Reinitialize peer with new ID
+      initializePeer('carcal-' + carId);
+    });
+
+    applyCameraSettingsButton.addEventListener('click', () => {
     applyCameraSettings();
+  });
+    } else {
+      alert('Please enter a Car ID');
+    }
   });
 }
 
@@ -245,8 +272,50 @@ function initializePeer(specificId = null) {
   peer.on('call', async (call) => {
     console.log(call, isCarMode, call.metadata);
 
-    if (isCarMode) {
+    if (isCarMode && isCarModeId == 0) {
+      try {
+        // In car mode, answer with the appropriate camera stream based on metadata
+        const metadata = call.metadata || {};
+        const cameraType = metadata.cameraType || 'front';
 
+        let stream;
+        switch (cameraType) {
+          case 'front':
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { deviceId: { exact: frontCameraSelect.value } },
+              audio: false,
+            });
+            console.log('Front camera stream obtained');
+            break;
+          case 'back':
+            stream = await navigator.mediaDevices.getUserMedia({
+              video: { deviceId: { exact: backCameraSelect.value } },
+              audio: false,
+            });
+            console.log('Back camera stream obtained');
+            break;
+        }
+
+        if (stream) {
+          setTimeout(() => {
+            call.answer(stream);
+            console.log(`Answered with ${cameraType} camera stream`, stream);
+          }, 1000);
+
+          call.on('stream', (remoteStream) => {
+            console.log('Got remote stream:', remoteStream);
+          });
+        } else {
+          console.error(
+            `Cannot answer call for ${cameraType} camera - stream not available`
+          );
+        }
+      } catch (err) {
+        console.error('Failed to initialize camera streams:', err);
+        alert('Failed to access cameras: ' + err.message);
+        return;
+      }
+    } else if (isCarMode && isCarModeId == 1) {
       try {
         // In car mode, answer with the appropriate camera stream based on metadata
         const metadata = call.metadata || {};
@@ -478,6 +547,46 @@ function handleCarConnection(dataConnection) {
 
     // Stop ping measurement
     clearInterval(pingInterval);
+  });
+}
+
+// connec to a car as the back cam for mobile device
+function connectToCarAsCam(carIdValue) {
+  // Add prefix if not already present
+  const fullCarId = carIdValue.startsWith('carcal-')
+    ? carIdValue
+    : 'carcal-' + carIdValue;
+
+  // Create data connection
+  const dataConnection = peer.connect(fullCarId);
+
+  dataConnection.on('open', () => {
+    conn = dataConnection;
+    isConnected = true;
+    updateConnectionStatus();
+    console.log('Connected to car: ' + conn.peer);
+
+    // Start ping for latency measurement
+    startPingMeasurement();
+  });
+
+  dataConnection.on('data', (data) => {
+    handleIncomingData(data);
+  });
+
+  dataConnection.on('close', () => {
+    conn = null;
+    isConnected = false;
+    updateConnectionStatus();
+    console.log('Connection closed');
+
+    // Stop ping measurement
+    clearInterval(pingInterval);
+  });
+
+  dataConnection.on('error', (err) => {
+    console.error('Connection error:', err);
+    clientConnectionStatus.textContent = 'Error: ' + err;
   });
 }
 
