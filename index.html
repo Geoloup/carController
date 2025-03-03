@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Car Camera System</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="ui.css" />
+    <script src="ui.js"></script>
+    <!-- PeerJS from CDN since we can't modify package.json -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  </head>
+  <body>
+    <div id="mode-selector">
+      <button id="car-mode-btn" class="mode-btn active">Car Mode</button>
+      <button id="client-mode-btn" class="mode-btn">Client Mode</button>
+    </div>
+
+    <!-- Car Mode Interface -->
+    <div id="car-interface" class="interface-container">
+      <div class="connection-panel">
+        <div class="server-id-container">
+          <h2>Your Car ID: <span id="car-id">Generating...</span></h2>
+          <button id="copy-car-id">Copy ID</button>
+          <button id="generate-new-id">Generate New ID</button>
+        </div>
+        <div class="status-container">
+          <p>
+            Status:
+            <span id="car-connection-status">Waiting for connection...</span>
+          </p>
+          <p>Latency: <span id="car-connection-latency">-- ms</span></p>
+        </div>
+      </div>
+
+      <div class="camera-container">
+        <div class="camera-view">
+          <h3>Front Camera</h3>
+          <video id="front-camera" autoplay muted playsinline></video>
+          <div class="motion-detection-overlay" id="front-motion-overlay"></div>
+        </div>
+        <div class="camera-view">
+          <h3>Side Camera</h3>
+          <video id="side-camera" autoplay muted playsinline></video>
+          <div class="motion-detection-overlay" id="side-motion-overlay"></div>
+        </div>
+        <div class="camera-view">
+          <h3>Back Camera</h3>
+          <video id="back-camera" autoplay muted playsinline></video>
+          <div class="motion-detection-overlay" id="back-motion-overlay"></div>
+        </div>
+      </div>
+
+      <div class="camera-settings">
+        <div class="camera-select-container">
+          <label for="front-camera-select">Front Camera:</label>
+          <select id="front-camera-select">
+            <option value="">Loading cameras...</option>
+          </select>
+        </div>
+        <div class="camera-select-container">
+          <label for="side-camera-select">Side Camera:</label>
+          <select id="side-camera-select">
+            <option value="">Loading cameras...</option>
+          </select>
+        </div>
+        <div class="camera-select-container">
+          <label for="back-camera-select">Back Camera:</label>
+          <select id="back-camera-select">
+            <option value="">Loading cameras...</option>
+          </select>
+        </div>
+        <button id="apply-camera-settings">Apply Camera Settings</button>
+      </div>
+    </div>
+
+    <!-- Client Mode Interface -->
+    <div id="client-interface" class="interface-container hidden">
+      <div class="connection-panel">
+        <div class="connect-container">
+          <input type="text" id="car-id-input" placeholder="Enter Car ID" />
+          <button id="connect-btn">Connect to Car</button>
+        </div>
+        <div class="status-container">
+          <p>Status: <span id="client-connection-status">Disconnected</span></p>
+          <p>Latency: <span id="client-connection-latency">-- ms</span></p>
+        </div>
+        <div class="view-controls">
+          <button id="fullscreen-btn">Enter Fullscreen</button>
+        </div>
+      </div>
+
+      <div id="client-view-container">
+        <div id="immersive-view">
+          <video id="client-front-view" autoplay playsinline></video>
+          <video id="client-side-view" autoplay playsinline></video>
+          <video id="client-back-view" autoplay playsinline></video>
+          <div class="warning-text">Objects are closer than they appear</div>
+          <div
+            class="motion-detection-overlay"
+            id="client-motion-overlay"
+          ></div>
+        </div>
+
+        <div id="all-cameras-view" class="hidden">
+          <div class="multi-camera-container">
+            <div class="camera-view">
+              <h3>Front Camera</h3>
+              <video id="client-front-view-small" autoplay playsinline></video>
+            </div>
+            <div class="camera-view">
+              <h3>Side Camera</h3>
+              <video id="client-side-view-small" autoplay playsinline></video>
+            </div>
+            <div class="camera-view">
+              <h3>Back Camera</h3>
+              <video id="client-back-view-small" autoplay playsinline></video>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
