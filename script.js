@@ -9,7 +9,6 @@ var carId = '';
 
 // Camera streams
 let frontCameraStream;
-let sideCameraStream;
 let backCameraStream;
 
 // Available devices
@@ -249,7 +248,6 @@ function initializePeer(specificId = null) {
     console.log(call, isCarMode, call.metadata);
 
     if (isCarMode) {
-      let frontCameraStreamCall, sideCameraStreamCall, backCameraStreamCall;
 
       try {
         // In car mode, answer with the appropriate camera stream based on metadata
@@ -386,16 +384,6 @@ async function initializeCameraStreams() {
 
     // If we have multiple cameras, try to get separate streams
     if (videoDevices.length > 1) {
-      // Get side camera stream
-      sideCameraStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          deviceId: sideCameraSelect.value
-            ? { exact: sideCameraSelect.value }
-            : undefined,
-        },
-      });
-      sideCamera.srcObject = sideCameraStream;
-
       // Get back camera stream if we have a third camera
       if (videoDevices.length > 2) {
         backCameraStream = await navigator.mediaDevices.getUserMedia({
@@ -407,15 +395,11 @@ async function initializeCameraStreams() {
         });
         backCamera.srcObject = backCameraStream;
       } else {
-        // Use the side camera for back view if we only have two cameras
-        backCameraStream = sideCameraStream;
         backCamera.srcObject = backCameraStream;
       }
     } else {
       // If we only have one camera, use it for all views
-      sideCameraStream = frontCameraStream;
       backCameraStream = frontCameraStream;
-      sideCamera.srcObject = sideCameraStream;
       backCamera.srcObject = backCameraStream;
     }
   } catch (err) {
@@ -430,13 +414,9 @@ async function applyCameraSettings() {
   if (frontCameraStream) {
     frontCameraStream.getTracks().forEach((track) => track.stop());
   }
-  if (sideCameraStream && sideCameraStream !== frontCameraStream) {
-    sideCameraStream.getTracks().forEach((track) => track.stop());
-  }
   if (
     backCameraStream &&
-    backCameraStream !== frontCameraStream &&
-    backCameraStream !== sideCameraStream
+    backCameraStream !== frontCameraStream
   ) {
     backCameraStream.getTracks().forEach((track) => track.stop());
   }
@@ -458,18 +438,6 @@ async function applyCameraSettings() {
         },
       });
       frontCamera.srcObject = frontCameraStream;
-    }
-
-    if (sideCameraSelect.value != '') {
-      // Get side camera stream
-      sideCameraStream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          deviceId: sideCameraSelect.value
-            ? { exact: sideCameraSelect.value }
-            : undefined,
-        },
-      });
-      sideCamera.srcObject = sideCameraStream;
     }
 
     if (backCameraSelect.value != '') {

@@ -42,11 +42,6 @@
           <div class="motion-detection-overlay" id="front-motion-overlay"></div>
         </div>
         <div class="camera-view">
-          <h3>Side Camera</h3>
-          <video id="side-camera" autoplay muted playsinline></video>
-          <div class="motion-detection-overlay" id="side-motion-overlay"></div>
-        </div>
-        <div class="camera-view">
           <h3>Back Camera</h3>
           <video id="back-camera" autoplay muted playsinline></video>
           <div class="motion-detection-overlay" id="back-motion-overlay"></div>
@@ -57,12 +52,6 @@
         <div class="camera-select-container">
           <label for="front-camera-select">Front Camera:</label>
           <select id="front-camera-select">
-            <option value="">Loading cameras...</option>
-          </select>
-        </div>
-        <div class="camera-select-container">
-          <label for="side-camera-select">Side Camera:</label>
-          <select id="side-camera-select">
             <option value="">Loading cameras...</option>
           </select>
         </div>
@@ -95,7 +84,6 @@
       <div id="client-view-container">
         <div id="immersive-view">
           <video id="client-front-view" autoplay playsinline></video>
-          <video id="client-side-view" autoplay playsinline></video>
           <video id="client-back-view" autoplay playsinline></video>
           <div class="warning-text">Objects are closer than they appear</div>
           <div
@@ -109,10 +97,6 @@
             <div class="camera-view">
               <h3>Front Camera</h3>
               <video id="client-front-view-small" autoplay playsinline></video>
-            </div>
-            <div class="camera-view">
-              <h3>Side Camera</h3>
-              <video id="client-side-view-small" autoplay playsinline></video>
             </div>
             <div class="camera-view">
               <h3>Back Camera</h3>
