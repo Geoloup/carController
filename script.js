@@ -383,8 +383,23 @@ async function getAvailableCameras() {
 // Populate camera select elements
 function populateCameraSelects() {
   // Clear existing options
-  frontCameraSelect.innerHTML = '<option value="">None</option>';
-  backCameraSelect.innerHTML = '<option value="">None</option>';
+  while (frontCameraSelect.firstChild) {
+    frontCameraSelect.removeChild(frontCameraSelect.firstChild);
+  }
+  while (backCameraSelect.firstChild) {
+    backCameraSelect.removeChild(backCameraSelect.firstChild);
+  }
+
+  // Add default "None" option
+  const frontDefaultOption = document.createElement('option');
+  frontDefaultOption.value = '';
+  frontDefaultOption.text = 'None';
+  frontCameraSelect.appendChild(frontDefaultOption);
+
+  const backDefaultOption = document.createElement('option');
+  backDefaultOption.value = '';
+  backDefaultOption.text = 'None';
+  backCameraSelect.appendChild(backDefaultOption);
 
   // Add camera options to each select
   videoDevices.forEach((device, index) => {
