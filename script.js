@@ -382,42 +382,46 @@ async function getAvailableCameras() {
 
 // Populate camera select elements
 function populateCameraSelects() {
-  // Clear existing options
-  while (frontCameraSelect.firstChild) {
-    frontCameraSelect.removeChild(frontCameraSelect.firstChild);
-  }
-  while (backCameraSelect.firstChild) {
-    backCameraSelect.removeChild(backCameraSelect.firstChild);
-  }
+  if (frontCameraSelect && backCameraSelect) {
+    // Clear existing options
+    while (frontCameraSelect.firstChild) {
+      frontCameraSelect.removeChild(frontCameraSelect.firstChild);
+    }
+    while (backCameraSelect.firstChild) {
+      backCameraSelect.removeChild(backCameraSelect.firstChild);
+    }
 
-  // Add default "None" option
-  const frontDefaultOption = document.createElement('option');
-  frontDefaultOption.value = '';
-  frontDefaultOption.text = 'None';
-  frontCameraSelect.appendChild(frontDefaultOption);
+    // Add default "None" option
+    const frontDefaultOption = document.createElement('option');
+    frontDefaultOption.value = '';
+    frontDefaultOption.text = 'None';
+    frontCameraSelect.appendChild(frontDefaultOption);
 
-  const backDefaultOption = document.createElement('option');
-  backDefaultOption.value = '';
-  backDefaultOption.text = 'None';
-  backCameraSelect.appendChild(backDefaultOption);
+    const backDefaultOption = document.createElement('option');
+    backDefaultOption.value = '';
+    backDefaultOption.text = 'None';
+    backCameraSelect.appendChild(backDefaultOption);
 
-  // Add camera options to each select
-  videoDevices.forEach((device, index) => {
-    const frontOption = document.createElement('option');
-    frontOption.value = device.deviceId;
-    frontOption.text = device.label || `Camera ${index + 1}`;
-    frontCameraSelect.appendChild(frontOption);
+    // Add camera options to each select
+    videoDevices.forEach((device, index) => {
+      const frontOption = document.createElement('option');
+      frontOption.value = device.deviceId;
+      frontOption.text = device.label || `Camera ${index + 1}`;
+      frontCameraSelect.appendChild(frontOption);
 
-    const backOption = document.createElement('option');
-    backOption.value = device.deviceId;
-    backOption.text = device.label || `Camera ${index + 1}`;
-    backCameraSelect.appendChild(backOption);
-  });
+      const backOption = document.createElement('option');
+      backOption.value = device.deviceId;
+      backOption.text = device.label || `Camera ${index + 1}`;
+      backCameraSelect.appendChild(backOption);
+    });
 
-  // If we have multiple cameras, set different defaults for each view
-  if (videoDevices.length > 1) {
-    frontCameraSelect.selectedIndex = 0;
-    backCameraSelect.selectedIndex = 0;
+    // If we have multiple cameras, set different defaults for each view
+    if (videoDevices.length > 1) {
+      frontCameraSelect.selectedIndex = 0;
+      backCameraSelect.selectedIndex = 0;
+    }
+  } else {
+    console.error('Camera select elements are not available.');
   }
 }
 
