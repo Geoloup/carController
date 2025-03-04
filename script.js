@@ -429,17 +429,19 @@ function populateCameraSelects() {
 async function initializeCameraStreams() {
   try {
     // Get front camera stream
-    frontCameraStream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        deviceId: frontCameraSelect.value
-          ? { exact: frontCameraSelect.value }
-          : undefined,
-      },
-    });
-    frontCamera.srcObject = frontCameraStream;
+    if (frontCameraSelect && frontCamera) {
+      frontCameraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          deviceId: frontCameraSelect.value
+            ? { exact: frontCameraSelect.value }
+            : undefined,
+        },
+      });
+      frontCamera.srcObject = frontCameraStream;
+    }
 
     // If we have multiple cameras, try to get separate streams
-    if (videoDevices.length > 1) {
+    if (videoDevices.length > 1 && backCameraSelect && backCamera) {
       // Get back camera stream if we have a third camera
       if (videoDevices.length > 2) {
         backCameraStream = await navigator.mediaDevices.getUserMedia({
@@ -453,7 +455,7 @@ async function initializeCameraStreams() {
       } else {
         backCamera.srcObject = backCameraStream;
       }
-    } else {
+    } else if (backCamera) {
       // If we only have one camera, use it for all views
       backCameraStream = frontCameraStream;
       backCamera.srcObject = backCameraStream;
