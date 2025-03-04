@@ -49,7 +49,6 @@ const applyCameraSettingsButton = document.getElementById(
 );
 
 const frontMotionOverlay = document.getElementById('front-motion-overlay');
-const sideMotionOverlay = document.getElementById('side-motion-overlay');
 const backMotionOverlay = document.getElementById('back-motion-overlay');
 
 // DOM Elements - Client Mode
@@ -66,16 +65,13 @@ const clientConnectionLatency = document.getElementById(
 
 const fullscreenBtn = document.getElementById('fullscreen-btn');
 const frontViewBtn = document.getElementById('front-view-btn');
-const sideViewBtn = document.getElementById('side-view-btn');
 const backViewBtn = document.getElementById('back-view-btn');
 const allViewBtn = document.getElementById('all-view-btn');
 
 const clientFrontView = document.getElementById('client-front-view');
-const clientSideView = document.getElementById('client-side-view');
 const clientBackView = document.getElementById('client-back-view');
 
 const clientFrontViewSmall = document.getElementById('client-front-view-small');
-const clientSideViewSmall = document.getElementById('client-side-view-small');
 const clientBackViewSmall = document.getElementById('client-back-view-small');
 
 const immersiveView = document.getElementById('immersive-view');
@@ -125,6 +121,7 @@ function switchMode(toCarMode,id=2) {
     carModeBtn2.classList.remove('active');
     clientModeBtn.classList.add('active');
     carInterface.classList.add('hidden');
+    carInterface2.classList.add('hidden');
     clientInterface.classList.remove('hidden');
 
     // Initialize client mode
@@ -160,41 +157,42 @@ function initializeCarMode() {
   if (!carId) {
     carId = generateCarId();
   }
+
+  // Initialize PeerJS with the car ID
+  initializePeer('carcal-' + carId);
+
+  // Display the car ID (without prefix)
+  carIdElement.textContent = carId;
+
+  // Set up event listeners for car mode
+  copyCarIdButton.addEventListener('click', () => {
+    navigator.clipboard
+      .writeText(carId)
+      .then(() => {
+        alert('Car ID copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Failed to copy:', err);
+      });
+  });
+
+  generateNewIdButton.addEventListener('click', () => {
+    // Generate a new ID
+    carId = generateCarId();
+    carIdElement.textContent = carId;
+
+    // Reinitialize peer with new ID
+    initializePeer('carcal-' + carId);
+  });
+
+  applyCameraSettingsButton.addEventListener('click', () => {
+    applyCameraSettings();
+  });
+
   carbutton.addEventListener('click', () => {
     const id = carIdInput2.value.trim();
     if (id) {
       connectToCarAsCam(id);
-
-    // Initialize PeerJS with the car ID
-    initializePeer('carcal2-' + carIdInput2);
-
-    // Display the car ID (without prefix)
-    carIdElement.textContent = carId;
-
-    // Set up event listeners for car mode
-    copyCarIdButton.addEventListener('click', () => {
-      navigator.clipboard
-        .writeText(carId)
-        .then(() => {
-          alert('Car ID copied to clipboard');
-        })
-        .catch((err) => {
-          console.error('Failed to copy:', err);
-        });
-    });
-
-    generateNewIdButton.addEventListener('click', () => {
-      // Generate a new ID
-      carId = generateCarId();
-      carIdElement.textContent = carId;
-
-      // Reinitialize peer with new ID
-      initializePeer('carcal-' + carId);
-    });
-
-    applyCameraSettingsButton.addEventListener('click', () => {
-    applyCameraSettings();
-  });
     } else {
       alert('Please enter a Car ID');
     }
@@ -287,13 +285,6 @@ function initializePeer(specificId = null) {
             });
             console.log('Front camera stream obtained');
             break;
-          case 'back':
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: { deviceId: { exact: backCameraSelect.value } },
-              audio: false,
-            });
-            console.log('Back camera stream obtained');
-            break;
         }
 
         if (stream) {
@@ -319,17 +310,10 @@ function initializePeer(specificId = null) {
       try {
         // In car mode, answer with the appropriate camera stream based on metadata
         const metadata = call.metadata || {};
-        const cameraType = metadata.cameraType || 'front';
+        const cameraType = metadata.cameraType || 'back';
 
         let stream;
         switch (cameraType) {
-          case 'front':
-            stream = await navigator.mediaDevices.getUserMedia({
-              video: { deviceId: { exact: frontCameraSelect.value } },
-              audio: false,
-            });
-            console.log('Front camera stream obtained');
-            break;
           case 'back':
             stream = await navigator.mediaDevices.getUserMedia({
               video: { deviceId: { exact: backCameraSelect.value } },
@@ -636,33 +620,31 @@ function connectToCar(carIdValue) {
 // Request camera streams from the car
 function requestCameraStreams() {
   const createEmptyAudioTrack = () => {
-    const createEmptyAudioTrack = () => {
-      const ctx = new AudioContext();
-      const oscillator = ctx.createOscillator();
-      const dst = oscillator.connect(ctx.createMediaStreamDestination());
-      oscillator.start();
-      const track = dst.stream.getAudioTracks()[0];
-      return Object.assign(track, { enabled: false });
-    };
-
-    const createEmptyVideoTrack = ({ width, height }) => {
-      const canvas = Object.assign(document.createElement('canvas'), {
-        width,
-        height,
-      });
-      canvas.getContext('2d').fillRect(0, 0, width, height);
-
-      const stream = canvas.captureStream();
-      const track = stream.getVideoTracks()[0];
-
-      return Object.assign(track, { enabled: false });
-    };
-
-    return new MediaStream([
-      createEmptyAudioTrack(),
-      createEmptyVideoTrack({ width: 640, height: 480 }),
-    ]);
+    const ctx = new AudioContext();
+    const oscillator = ctx.createOscillator();
+    const dst = oscillator.connect(ctx.createMediaStreamDestination());
+    oscillator.start();
+    const track = dst.stream.getAudioTracks()[0];
+    return Object.assign(track, { enabled: false });
   };
+
+  const createEmptyVideoTrack = ({ width, height }) => {
+    const canvas = Object.assign(document.createElement('canvas'), {
+      width,
+      height,
+    });
+    canvas.getContext('2d').fillRect(0, 0, width, height);
+
+    const stream = canvas.captureStream();
+    const track = stream.getVideoTracks()[0];
+
+    return Object.assign(track, { enabled: false });
+  };
+
+  return new MediaStream([
+    createEmptyAudioTrack(),
+    createEmptyVideoTrack({ width: 640, height: 480 }),
+  ]);
 
   console.log('Requesting front camera...');
 
@@ -680,25 +662,11 @@ function requestCameraStreams() {
   frontCall.on('error', (err) => {
     console.error('Front camera error:', err);
   });
-  console.log('Requesting side camera...');
-  const sideCall = peer.call(conn.peer, createEmptyAudioTrack(), {
-    metadata: { cameraType: 'side' },
-  });
 
-  sideCall.on('stream', (stream) => {
-    console.log('Side camera stream received.');
-    clientSideView.srcObject = stream;
-    clientSideViewSmall.srcObject = stream;
-  });
-
-  sideCall.on('error', (err) => {
-    console.error('Side camera error:', err);
-  });
   console.log('Requesting back camera...');
   const backCall = peer.call(conn.peer, createEmptyAudioTrack(), {
     metadata: { cameraType: 'back' },
   });
-  console.log;
 
   backCall.on('stream', (stream) => {
     console.log('Back camera stream received.');
