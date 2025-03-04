@@ -1,128 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-  <title>Car Camera System</title>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="ui.css" />
-  <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
-  <script>eruda.init();</script>
-  <script src="ui.js"></script>
-  <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
-</head>
-
-<body>
-  <div id="mode-selector">
-    <button id="car-mode-btn" class="mode-btn active">Car Mode</button>
-    <button id="car2-mode-btn" class="mode-btn">Car Mode 2</button>
-    <button id="client-mode-btn" class="mode-btn">Client Mode</button>
-  </div>
-
-  <!-- Car Mode Interface -->
-  <div id="car-interface" class="interface-container">
-    <div class="connection-panel">
-      <div class="server-id-container">
-        <h2>Your Car ID: <span id="car-id">Generating...</span></h2>
-        <button id="copy-car-id">Copy ID</button>
-        <button id="generate-new-id">Generate New ID</button>
-      </div>
-      <div class="status-container">
-        <p>Status: <span id="car-connection-status">Waiting for connection...</span></p>
-        <p>Latency: <span id="car-connection-latency">-- ms</span></p>
-      </div>
-    </div>
-    
-    <div class="camera-container">
-      <div class="camera-view">
-        <h3>Front Camera</h3>
-        <video id="front-camera" autoplay muted playsinline></video>
-        <div class="motion-detection-overlay" id="front-motion-overlay"></div>
-      </div>
+  <head>
+    <title>Car Camera System</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="ui.css" />
+    <script src="ui.js"></script>
+    <!-- PeerJS from CDN since we can't modify package.json -->
+    <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
+  </head>
+  <body>
+    <div id="mode-selector">
+      <button id="car-mode-btn" class="mode-btn active">Car Mode</button>
+      <button id="camera-mode-btn" class="mode-btn">Camera Mode</button>
+      <button id="client-mode-btn" class="mode-btn">Client Mode</button>
     </div>
 
-    <div class="camera-settings">
-      <div class="camera-select-container">
-        <label for="front-camera-select">Front Camera:</label>
-        <select id="front-camera-select">
-          <option value="">Loading cameras...</option>
-        </select>
+    <!-- Car Mode Interface (Server) -->
+    <div id="car-interface" class="interface-container">
+      <div class="connection-panel">
+        <div class="server-id-container">
+          <h2>Your Car ID: <span id="car-id">Generating...</span></h2>
+          <button id="copy-car-id">Copy ID</button>
+          <button id="generate-new-id">Generate New ID</button>
+        </div>
+        <div class="status-container">
+          <p>
+            Status:
+            <span id="car-connection-status">Waiting for connection...</span>
+          </p>
+          <p>Latency: <span id="car-connection-latency">-- ms</span></p>
+        </div>
       </div>
-      <button id="apply-camera-settings">Apply Camera Settings</button>
-    </div>
-  </div>
 
-  <!-- Car Mode 2 Interface -->
-  <div id="car-interface2" class="interface-container hidden">
-    <div class="connection-panel">
-      <div class="server-id-container">
-        <input type="text" id="car-id-input2" placeholder="Enter Car ID" />
-        <button id="car-connect-btn">Connect to Car</button>
-      </div>
-      <div class="status-container">
-        <p>Status: <span id="car2-connection-status">Waiting for connection...</span></p>
-        <p>Latency: <span id="car2-connection-latency">-- ms</span></p>
+      <div class="connection-info">
+        <h3>Connected Cameras:</h3>
+        <ul id="connected-cameras-list">
+          <li>No cameras connected</li>
+        </ul>
+        <h3>Connected Clients:</h3>
+        <ul id="connected-clients-list">
+          <li>No clients connected</li>
+        </ul>
       </div>
     </div>
 
-    <div class="camera-container">
-      <div class="camera-view">
-        <h3>Back Camera</h3>
-        <video id="back-camera2" autoplay muted playsinline></video>
-        <div class="motion-detection-overlay" id="back-motion-overlay2"></div>
+    <!-- Camera Mode Interface -->
+    <div id="camera-interface" class="interface-container hidden">
+      <div class="connection-panel">
+        <div class="connect-container">
+          <input type="text" id="car-id-input-camera" placeholder="Enter Car ID" />
+          <button id="connect-camera-btn">Connect to Car</button>
+        </div>
+        <div class="status-container">
+          <p>Status: <span id="camera-connection-status">Disconnected</span></p>
+          <p>Latency: <span id="camera-connection-latency">-- ms</span></p>
+        </div>
       </div>
-    </div>
-    
-    <div class="camera-settings">
-      <div class="camera-select-container">
-        <label for="back-camera-select2">Back Camera:</label>
-        <select id="back-camera-select2">
-          <option value="">Loading cameras...</option>
-        </select>
-      </div>
-      <button id="apply-camera-settings">Apply Camera Settings</button>
-    </div>
-  </div>
 
-  <!-- Client Mode Interface -->
-  <div id="client-interface" class="interface-container hidden">
-    <div class="connection-panel">
-      <div class="connect-container">
-        <input type="text" id="car-id-input" placeholder="Enter Car ID" />
-        <button id="connect-btn">Connect to Car</button>
+      <div class="camera-container">
+        <div class="camera-view">
+          <h3>Camera Preview</h3>
+          <video id="camera-preview" autoplay muted playsinline></video>
+        </div>
       </div>
-      <div class="status-container">
-        <p>Status: <span id="client-connection-status">Disconnected</span></p>
-        <p>Latency: <span id="client-connection-latency">-- ms</span></p>
-      </div>
-      <div class="view-controls">
-        <button id="fullscreen-btn">Enter Fullscreen</button>
-      </div>
-    </div>
 
-    <div id="client-view-container">
-      <div id="immersive-view">
-        <video id="client-front-view" autoplay playsinline></video>
-        <video id="client-back-view" autoplay playsinline></video>
-        <div class="warning-text">Objects are closer than they appear</div>
-        <div class="motion-detection-overlay" id="client-motion-overlay"></div>
-      </div>
-      <div id="all-cameras-view" class="hidden">
-        <div class="multi-camera-container">
-          <div class="camera-view">
-            <h3>Front Camera</h3>
-            <video id="client-front-view-small" autoplay playsinline></video>
+      <div class="camera-settings">
+        <div class="camera-select-container">
+          <label for="camera-select">Camera:</label>
+          <select id="camera-select">
+            <option value="">Loading cameras...</option>
+          </select>
+        </div>
+        <div class="camera-role-container">
+          <label>Camera Role:</label>
+          <div class="role-buttons">
+            <button id="front-camera-role" class="role-btn active">Front Camera</button>
+            <button id="back-camera-role" class="role-btn">Back Camera</button>
           </div>
-          <div class="camera-view">
-            <h3>Back Camera</h3>
-            <video id="client-back-view-small" autoplay playsinline></video>
+        </div>
+        <button id="apply-camera-settings">Apply Camera Settings</button>
+      </div>
+    </div>
+
+    <!-- Client Mode Interface -->
+    <div id="client-interface" class="interface-container hidden">
+      <div class="connection-panel">
+        <div class="connect-container">
+          <input type="text" id="car-id-input-client" placeholder="Enter Car ID" />
+          <button id="connect-client-btn">Connect to Car</button>
+        </div>
+        <div class="status-container">
+          <p>Status: <span id="client-connection-status">Disconnected</span></p>
+          <p>Latency: <span id="client-connection-latency">-- ms</span></p>
+        </div>
+        <div class="view-controls">
+          <button id="fullscreen-btn">Enter Fullscreen</button>
+        </div>
+      </div>
+
+      <div id="client-view-container">
+        <div id="immersive-view">
+          <video id="client-front-view" autoplay playsinline></video>
+          <video id="client-back-view" autoplay playsinline></video>
+          <div class="warning-text">Objects are closer than they appear</div>
+        </div>
+
+        <div id="all-cameras-view" class="hidden">
+          <div class="multi-camera-container">
+            <div class="camera-view">
+              <h3>Front Camera</h3>
+              <video id="client-front-view-small" autoplay playsinline></video>
+            </div>
+            <div class="camera-view">
+              <h3>Back Camera</h3>
+              <video id="client-back-view-small" autoplay playsinline></video>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <script src="script.js"></script>
-</body>
+    <script src="script.js"></script>
+  </body>
 </html>

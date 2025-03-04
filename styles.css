@@ -117,7 +117,31 @@ button:hover {
   background-color: #7b1fa2;
 }
 
-/* Camera Container for Car Mode */
+/* Connection Info */
+.connection-info {
+  background-color: #1e1e1e;
+  border-radius: 8px;
+  padding: 15px;
+  margin-bottom: 15px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+}
+
+.connection-info h3 {
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.connection-info ul {
+  list-style-type: none;
+  padding-left: 10px;
+}
+
+.connection-info li {
+  padding: 5px 0;
+  color: #aaa;
+}
+
+/* Camera Container */
 .camera-container {
   display: flex;
   flex-wrap: wrap;
@@ -159,6 +183,27 @@ video {
   min-width: 200px;
 }
 
+.camera-role-container {
+  flex: 1;
+  min-width: 300px;
+  margin-top: 10px;
+}
+
+.role-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 5px;
+}
+
+.role-btn {
+  background-color: #333;
+}
+
+.role-btn.active {
+  background-color: #4caf50;
+}
+
 select {
   padding: 10px;
   border-radius: 4px;
@@ -173,8 +218,8 @@ select {
 #client-view-container {
   height: calc(100vh - 140px);
   position: relative;
-
-  transform: rotateY(180deg);}
+  transform: rotateY(180deg);
+}
 
 #immersive-view {
   position: relative;
@@ -222,22 +267,6 @@ select {
   height: calc(100% - 40px);
 }
 
-/* Motion Detection */
-.motion-detection-overlay {
-  position: absolute;
-  top: 15px;
-  left: 15px;
-  right: 15px;
-  bottom: 15px;
-  pointer-events: none;
-  z-index: 10;
-}
-
-.motion-box {
-  position: absolute;
-  border: 1px solid red;
-}
-
 .warning-text {
   position: absolute;
   bottom: 20px;
@@ -252,6 +281,7 @@ select {
 
 /* Connection Status */
 #car-connection-status,
+#camera-connection-status,
 #client-connection-status {
   font-weight: bold;
   color: #f44336;
@@ -262,6 +292,7 @@ select {
 }
 
 #car-connection-latency,
+#camera-connection-latency,
 #client-connection-latency {
   font-weight: bold;
 }
@@ -317,10 +348,6 @@ select {
   #client-view-container {
     height: calc(100vh - 200px);
   }
-}
-
-#client-side-view {
-  display:none;
 }
 
 #client-back-view {
