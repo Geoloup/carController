@@ -1,36 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>Car Camera System</title>
+    <title>Camera System</title>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="styles.css" />
     <link rel="stylesheet" href="ui.css" />
     <script src="ui.js"></script>
-    <!-- PeerJS from CDN since we can't modify package.json -->
     <script src="https://unpkg.com/peerjs@1.4.7/dist/peerjs.min.js"></script>
   </head>
   <body>
     <div id="mode-selector">
-      <button id="car-mode-btn" class="mode-btn active">Car Mode</button>
+      <button id="client-mode-btn" class="mode-btn active">View Mode (Server)</button>
       <button id="camera-mode-btn" class="mode-btn">Camera Mode</button>
-      <button id="client-mode-btn" class="mode-btn">Client Mode</button>
     </div>
 
-    <!-- Car Mode Interface (Server) -->
-    <div id="car-interface" class="interface-container">
+    <!-- Client Mode Interface (Server) -->
+    <div id="client-interface" class="interface-container">
       <div class="connection-panel">
         <div class="server-id-container">
-          <h2>Your Car ID: <span id="car-id">Generating...</span></h2>
-          <button id="copy-car-id">Copy ID</button>
+          <h2>Your View ID: <span id="client-id">Generating...</span></h2>
+          <button id="copy-client-id">Copy ID</button>
           <button id="generate-new-id">Generate New ID</button>
         </div>
         <div class="status-container">
-          <p>
-            Status:
-            <span id="car-connection-status">Waiting for connection...</span>
-          </p>
-          <p>Latency: <span id="car-connection-latency">-- ms</span></p>
+          <p>Status: <span id="client-connection-status">Waiting for cameras...</span></p>
+          <p>Latency: <span id="client-connection-latency">-- ms</span></p>
+        </div>
+        <div class="view-controls">
+          <button id="fullscreen-btn">Enter Fullscreen</button>
         </div>
       </div>
 
@@ -39,10 +37,14 @@
         <ul id="connected-cameras-list">
           <li>No cameras connected</li>
         </ul>
-        <h3>Connected Clients:</h3>
-        <ul id="connected-clients-list">
-          <li>No clients connected</li>
-        </ul>
+      </div>
+
+      <div id="client-view-container">
+        <div id="immersive-view">
+          <video id="client-front-view" autoplay playsinline></video>
+          <video id="client-back-view" autoplay playsinline></video>
+          <div class="warning-text">Objects are closer than they appear</div>
+        </div>
       </div>
     </div>
 
@@ -50,8 +52,8 @@
     <div id="camera-interface" class="interface-container hidden">
       <div class="connection-panel">
         <div class="connect-container">
-          <input type="text" id="car-id-input-camera" placeholder="Enter Car ID" />
-          <button id="connect-camera-btn">Connect to Car</button>
+          <input type="text" id="view-id-input" placeholder="Enter View ID" />
+          <button id="connect-camera-btn">Connect Camera</button>
         </div>
         <div class="status-container">
           <p>Status: <span id="camera-connection-status">Disconnected</span></p>
@@ -84,41 +86,11 @@
       </div>
     </div>
 
-    <!-- Client Mode Interface -->
-    <div id="client-interface" class="interface-container hidden">
-      <div class="connection-panel">
-        <div class="connect-container">
-          <input type="text" id="car-id-input-client" placeholder="Enter Car ID" />
-          <button id="connect-client-btn">Connect to Car</button>
-        </div>
-        <div class="status-container">
-          <p>Status: <span id="client-connection-status">Disconnected</span></p>
-          <p>Latency: <span id="client-connection-latency">-- ms</span></p>
-        </div>
-        <div class="view-controls">
-          <button id="fullscreen-btn">Enter Fullscreen</button>
-        </div>
-      </div>
-
-      <div id="client-view-container">
-        <div id="immersive-view">
-          <video id="client-front-view" autoplay playsinline></video>
-          <video id="client-back-view" autoplay playsinline></video>
-          <div class="warning-text">Objects are closer than they appear</div>
-        </div>
-
-        <div id="all-cameras-view" class="hidden">
-          <div class="multi-camera-container">
-            <div class="camera-view">
-              <h3>Front Camera</h3>
-              <video id="client-front-view-small" autoplay playsinline></video>
-            </div>
-            <div class="camera-view">
-              <h3>Back Camera</h3>
-              <video id="client-back-view-small" autoplay playsinline></video>
-            </div>
-          </div>
-        </div>
+    <div id="camera-permission" class="permission-overlay hidden">
+      <div class="permission-dialog">
+        <h2>Camera Access Required</h2>
+        <p>Please allow access to your camera to use this application.</p>
+        <button id="grant-permission">Grant Access</button>
       </div>
     </div>
 
