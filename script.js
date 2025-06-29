@@ -215,26 +215,23 @@ function initializeClientMode() {
 }
 
 // Initialize PeerJS for camera mode
-function initializeCameraMode() {
-  // Get available cameras
-  getAvailableCameras();
+async function initializeCameraStream() {
+  try {
+    if (cameraSelect.value) {
+      const constraints = {
+        video: {
+          deviceId: { exact: cameraSelect.value }
+        },
+        audio: cameraRole === 'front' // Only include audio for front cam
+      };
 
-  // Initialize PeerJS with a random ID
-  initializePeer();
-
-  // Set up event listeners for camera mode
-  connectCameraBtn.addEventListener('click', () => {
-    const id = viewIdInput.value.trim();
-    if (id) {
-      connectToView(id);
-    } else {
-      alert('Please enter a View ID');
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+      cameraPreview.srcObject = cameraStream;
     }
-  });
-
-  applyCameraSettingsButton.addEventListener('click', () => {
-    applyCameraSettings();
-  });
+  } catch (err) {
+    console.error('Failed to initialize camera:', err);
+    alert('Failed to access camera: ' + err.message);
+  }
 }
 
 // Initialize PeerJS
@@ -471,13 +468,16 @@ async function applyCameraSettings() {
 
   try {
     if (cameraSelect.value) {
-      cameraStream = await navigator.mediaDevices.getUserMedia({
+      const constraints = {
         video: {
-          deviceId: cameraSelect.value ? { exact: cameraSelect.value } : undefined
-        }
-      });
+          deviceId: { exact: cameraSelect.value }
+        },
+        audio: cameraRole === 'front' // Only share mic when front cam is used
+      };
+
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
       cameraPreview.srcObject = cameraStream;
-      
+
       if (isConnected && conn) {
         sendCameraStream();
       }
