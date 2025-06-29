@@ -215,25 +215,27 @@ function initializeClientMode() {
 }
 
 // Initialize PeerJS for camera mode
-async function initializeCameraStream() {
-  try {
-    if (cameraSelect.value) {
-      const constraints = {
-        video: {
-          deviceId: { exact: cameraSelect.value }
-        },
-        audio: cameraRole === 'front' // Only include audio for front cam
-      };
+function initializeCameraMode() {
+  // Get available cameras
+  getAvailableCameras();
 
-      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
-      cameraPreview.srcObject = cameraStream;
+  // Initialize PeerJS with a random ID
+  initializePeer();
+
+  // Set up event listeners for camera mode
+  connectCameraBtn.addEventListener('click', () => {
+    const id = viewIdInput.value.trim();
+    if (id) {
+      connectToView(id);
+    } else {
+      alert('Please enter a View ID');
     }
-  } catch (err) {
-    console.error('Failed to initialize camera:', err);
-    alert('Failed to access camera: ' + err.message);
-  }
-}
+  });
 
+  applyCameraSettingsButton.addEventListener('click', () => {
+    applyCameraSettings();
+  });
+}
 // Initialize PeerJS
 function initializePeer(specificId = null) {
   // Destroy existing peer if any
@@ -446,11 +448,14 @@ function populateCameraSelects() {
 async function initializeCameraStream() {
   try {
     if (cameraSelect.value) {
-      cameraStream = await navigator.mediaDevices.getUserMedia({
+      const constraints = {
         video: {
-          deviceId: cameraSelect.value ? { exact: cameraSelect.value } : undefined
-        }
-      });
+          deviceId: { exact: cameraSelect.value }
+        },
+        audio: cameraRole === 'front' // Only include audio for front cam
+      };
+
+      cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
       cameraPreview.srcObject = cameraStream;
     }
   } catch (err) {
@@ -458,6 +463,7 @@ async function initializeCameraStream() {
     alert('Failed to access camera: ' + err.message);
   }
 }
+
 
 // Apply camera settings
 async function applyCameraSettings() {
